@@ -1,0 +1,40 @@
+name: Python application
+
+on: [push]
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: [3.14.3]
+        poetry-version: [2.3.2]
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install Poetry ${{ matrix.poetry-version }}
+        run: |
+          python -m pip install --upgrade pip
+          pip install poetry==${{ matrix.poetry-version }}
+
+      - name: Install dependencies
+        shell: bash
+        run: |
+          poetry install
+
+      - name: Run tests
+        env:
+          SECRET_KEY: "test_key"
+          DEBUG: 1
+          DJANGO_ALLOWED_HOSTS: "localhost 127.0.0.1"
+          SQL_ENGINE: "django.db.backends.sqlite3"
+          SQL_DATABASE: "db.sqlite3"
+        run: |
+          poetry run python manage.py test
