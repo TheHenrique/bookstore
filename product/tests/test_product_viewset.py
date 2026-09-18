@@ -65,3 +65,28 @@ class TestProductViewSet(APITestCase):
         created_product = Product.objects.get(title="Keyboard")
         self.assertEqual(created_product.price, 80.00)
         self.assertEqual(created_product.title, "Keyboard")
+
+    def test_get_single_product(self):
+        token = Token.objects.get(user__username=self.user.username)
+        self.client.credentials(HTTP_AUTHORIZATION="Token " + token.key)
+
+        url = reverse(
+            "product-detail",
+            kwargs={"version": "v1", "pk": self.product.id},
+        )
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        product_data = json.loads(response.content)
+        self.assertEqual(product_data["title"], self.product.title)
+
+    def test_delete_product(self):
+        token = Token.objects.get(user__username=self.user.username)
+        self.client.credentials(HTTP_AUTHORIZATION="Token " + token.key)
+
+        url = reverse(
+            "product-detail",
+            kwargs={"version": "v1", "pk": self.product.id},
+        )
+        response = self.client.delete(url)
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertFalse(Product.objects.filter(id=self.product.id).exists())
