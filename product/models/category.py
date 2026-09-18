@@ -7,5 +7,5 @@ class Category(models.Model):
     description = models.TextField()
     active = models.BooleanField(default=True)
 
-    def __unicode__(self):
-        return self.title
+    def __str__(self):
+        return self.title or f"Category #{self.id}"
