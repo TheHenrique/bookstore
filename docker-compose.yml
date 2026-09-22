@@ -10,6 +10,8 @@ services:
       - ./env.dev
     depends_on:
       - db
+    networks:
+      - bookstore_network
   db:
     image: postgres:18-alpine
     volumes:
@@ -20,7 +22,13 @@ services:
       - POSTGRES_DB=bookstore_dev_db
     ports:
       - 5432:5432
+    networks:
+      - bookstore_network
 
 volumes:
   postgres_data:
   app_data:
+
+networks:
+  bookstore_network:
+    driver: bridge
