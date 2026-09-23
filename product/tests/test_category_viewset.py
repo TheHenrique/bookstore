@@ -39,3 +39,36 @@ class CategoryViewSet(APITestCase):
 
         created_category = Category.objects.get(title="Food")
         self.assertEqual(created_category.title, "Food")
+
+    def test_get_single_category(self):
+        url = reverse(
+            "category-detail",
+            kwargs={"version": "v1", "pk": self.category.id},
+        )
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        category_data = json.loads(response.content)
+        self.assertEqual(category_data["title"], self.category.title)
+
+    def test_delete_category(self):
+        url = reverse(
+            "category-detail",
+            kwargs={"version": "v1", "pk": self.category.id},
+        )
+        response = self.client.delete(url)
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertFalse(Category.objects.filter(id=self.category.id).exists())
+
+    def test_category_list_is_paginated(self):
+        for i in range(7):
+            CategoryFactory(title=f"categoria-{i}")
+
+        url = reverse("category-list", kwargs={"version": "v1"})
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        category_data = json.loads(response.content)
+
+        self.assertEqual(category_data["count"], 8)
+        self.assertEqual(len(category_data["results"]), 5)
+        self.assertIsNotNone(category_data["next"])
