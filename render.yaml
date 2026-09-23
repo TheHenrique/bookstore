@@ -10,7 +10,7 @@ services:
     plan: free
     healthCheckPath: /hello/
     autoDeploy: false
-    preDeployCommand: python manage.py migrate
+    dockerCommand: sh -c "python manage.py migrate --noinput && python manage.py runserver 0.0.0.0:8000"
     envVars:
       - key: PORT
         value: "8000"
